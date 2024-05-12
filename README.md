@@ -6,3 +6,5 @@ This is an initiative funded by the IRD unit IIT Delhi under the Summer Undergra
   * Download the BGU dataset / alternatively the Harvard dataset
   * Make the code more general for any fork
   * Be able to run it on 2D dep-sep before anything else :) 
+
+## How to run the code?
