@@ -2,7 +2,6 @@ import os
 import h5py
 import numpy as np
 import cv2
-#from utilities import Im2Patch
 from scipy.interpolate import interp1d
 from shutil import copyfile
 import matplotlib.pyplot as plt
@@ -31,18 +30,18 @@ def normalize(data, max_val, min_val):
 # # # # use this def when creating train patches (comment and un-comment accordingly)
 def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode):   #hyper_name instead of rgb_name
     #hyper data as mat
-#     mathy =  h5py.File(hyper_name,'r')
-    mathy = scipy.io.loadmat(hyper_name)
+    mathy =  h5py.File(hyper_name,'r')
+    # mathy = scipy.io.loadmat(hyper_name)
     hyper = np.float32(np.array(mathy['rad']))
     print('before trans',hyper.shape)
     #for bgu,cave
     hyper = np.transpose(hyper, [2,0,1])
     print('AFTER trans',hyper.shape)
     hyper = normalize(hyper, max_val=255., min_val=0.)  #normalize rgb in harv
-    #print('hypershape',hyper.shape)
+    print('hypershape',hyper.shape)
     #use normalize here instead of normalizing in matlab(always check in matlab for normalisation(do u even need it)) - 15/7/'22
     #for bgu
-#     hyper = normalize(hyper, max_val=4095., min_val=0.)
+    hyper = normalize(hyper, max_val=4095., min_val=0.)
     #for cave
     #hyper = normalize(hyper, max_val=65535., min_val=0.)
 
@@ -51,7 +50,7 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
     
     #rgb without interpolation 
     rgb =  cv2.imread(rgb_name)
-    #rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
+    # rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
     print('before transpose',rgb.shape)    
     rgb = np.transpose(rgb, [2,0,1])
     print('trans-rgbshape',rgb.shape)
@@ -145,3 +144,5 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
 #     h5f.create_dataset(str(key), data=data)
 #     index += 1
 #     return index
+
+process_data(index = 1, key = 263, patch_size = 64, stride = 1, h5f = 'train.h5', hyper_name = 'data/BGU/train_spectral/BGU_HS_00263.mat', rgb_name = 'data/BGU/train_clean/BGU_HS_00263_clean.png', mode = 'train')

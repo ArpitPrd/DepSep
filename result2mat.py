@@ -4,12 +4,19 @@ import numpy as np
 import scipy.io as scio
 from tqdm import tqdm
 from train import batch_PSNR
+from convmixer import AdapConvMixer
+
 
 from matplotlib import pyplot as plt
 
-def Result2Mat(model, val_dataloader, val_patches):
-    
+def Result2Mat(val_dataloader, val_patches, best_model_path):
+     dim = 64
+     depth = 10
+     kernel_size = 5
+     patch_size = 1
      print('Result to mat')
+     model = AdapConvMixer(dim,depth,kernel_size,patch_size)
+     model.load_state_dict(torch.load(best_model_path))
     #model.train()
     # running_loss = 0.0
     # running_loss_2 = 0.0
@@ -21,7 +28,7 @@ def Result2Mat(model, val_dataloader, val_patches):
           #changed path to absolute path -  SH(19/05/'22)
           #path = '/home/user/Documents/Paper Aug 2022/data/Cave/'
           #path = '/home/user/Documents/Paper Aug 2022/data/Harvard/'
-          path = '/home/user/Documents/Paper Aug 2022/data/BGU/'
+          path = './data/BGU/'
 
           test_names_file = open(os.path.join(path, 'test_names.txt'), mode='r')
 
@@ -37,7 +44,7 @@ def Result2Mat(model, val_dataloader, val_patches):
      print('test_rgb_filename_list len : {}'.format(len(test_rgb_filename_list)))
 
      #this path belongs to the dir-path where the results are to be stored     - 26/07/'22 
-     path = '/home/user/Documents/Paper Aug 2022/data/BGU/'
+     path = './data/BGU/'
      #path = '/home/user/Documents/Paper Aug 2022/data/Cave/'
      #path = '/home/user/Documents/Paper Aug 2022/data/Harvard/'
      if not os.path.exists(os.path.join(path, 'result')):
@@ -46,13 +53,13 @@ def Result2Mat(model, val_dataloader, val_patches):
      with torch.no_grad():
           for i, data in tqdm(enumerate(val_dataloader), total=int(len(val_dataloader)/val_dataloader.batch_size)):
                     counter += 1
-                    file_name = test_rgb_filename_list[i].split('/')[-1]
+                    # file_name = test_rgb_filename_list[i].split('/')[-1].split('_')[-1])
      #add split('_')[-1]) for BGU , and split('-')[-1]) for other dataset accordingly - SH(26.05.22)
-                    key = int(file_name.split('.')[0].split('_')[-1].split('-')[-1])
-                    print(file_name, key)
-                    inputs, labels = val_patches.get_data_by_key(str(key))
+                    # key = int(file_name.split('.')[0].split('_')[-1].split('-')[-1])
+                    # print(file_name, key)
+                    inputs, labels = val_patches.get_data_by_key(str(test_rgb_filename_list[i][:-1]))
                     inputs, labels = torch.unsqueeze(inputs, 0), torch.unsqueeze(labels, 0)
-                    inputs, labels = inputs.cuda(), labels.cuda()
+                    inputs, labels = inputs, labels # cuda removed
                     outputs = model(inputs)
                     fake_hyper_mat = outputs[0,:,:,:].cpu().numpy()
                     #print('max(max)of fh',fake_hyper_mat.max())

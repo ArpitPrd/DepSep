@@ -59,44 +59,51 @@ cuda0 = torch.device('cuda:0')
 #create train h5 file
 class PreparePatches(Dataset):     #load list of path to __init__
     def __init__(self):
-            self.h5f = h5py.File('/home/user/Documents/Paper Aug 2022/data/BGU/train.h5','r')
-            self.keys = list(self.h5f.keys())
-            random.shuffle(self.keys)
+        self.h5f = h5py.File('./data/BGU/train.h5','r')
+        self.keys = list(self.h5f.keys())
+        random.shuffle(self.keys)
 
     def __len__(self):
-            return len(self.keys) 
+        return len(self.keys) 
             
            
     def __getitem__(self,index):    #load each image/file in __getitem__
-            key = str(self.keys[index])
-            data = np.array(self.h5f[key])
-            data = torch.Tensor(data)
-            return data[0:31,:,:], data[31:62,:,:]
-#             return data
+        key = str(self.keys[index])
+        data = np.array(self.h5f[key])
+        data = torch.Tensor(data)
+        # print('printing shape of data', data.shape)
+        inputs = data[0:31, :, :]
+        labels = data[31:62, :, :]
+        # print('inputs in PreparePateches', inputs.shape)
+        # print('labels in PreparePateches', labels.shape)
+        # return data[0:31,:,:], data[31:62,:,:]
+        return inputs, labels
 
 #create val h5 file
 class PreparevalPatches(Dataset):     #load list of absolute path to __init__
     def __init__(self):
-            #previous cave file
-            self.h5f = h5py.File('/DATA1/user/Documents/Paper Aug 2022/data/BGU/testwithBRIDGE.h5','r')
-            self.keys = list(self.h5f.keys())
-            print(len(self.keys))
-            random.shuffle(self.keys)
+        #previous cave file
+        self.h5f = h5py.File('./data/BGU/testwithBRIDGE.h5','r')
+        self.keys = list(self.h5f.keys())
+        random.shuffle(self.keys)
+        self.batch_size = 10 # assumed some batchsize
 
     def __len__(self):
-            return len(self.keys) 
+        return len(self.keys) 
             
            
     def __getitem__(self,index):    #load each image/file in __getitem__
-            key = str(self.keys[index])
-            data = np.array(self.h5f[key])
-            data = torch.Tensor(data)
-            #In Cave, the results were fixed by correctly using the below 'data' range
-            return data[0:31,:,:], data[31:62,:,:]
+        key = str(self.keys[index])
+        data = np.array(self.h5f[key])
+        data = torch.Tensor(data)
+        #In Cave, the results were fixed by correctly using the below 'data' range
+        return data[0:31,:,:], data[31:62,:,:]
         
     def get_data_by_key(self, key):
-            #assert self.mode == 'test'
-            data = np.array(self.h5f[key])
-            data = torch.Tensor(data)
-            return data[0:31,:,:], data[31:62,:,:]
+        #assert self.mode == 'test'
+        print(self.keys)
+        data = np.array(self.h5f[key])
+        # data = np.array(self.h5f[key])
+        data = torch.Tensor(data)
+        return data[0:31,:,:], data[31:62,:,:]
 

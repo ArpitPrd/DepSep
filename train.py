@@ -20,25 +20,25 @@ def training(model, loss_fn, optimizer, tr_dataloader, epoch):
     
     for i, data in tqdm(enumerate(tr_dataloader), total=int(len(tr_dataloader)/tr_dataloader.batch_size)):
         counter += 1
-        
-        
-        inputs,labels = data
+        inputs, labels = data
         #interpolate to decide about the size of labels acc. to the patch size - 15/7/'22
         #labels = F.interpolate(labels,size=[64,64])
-        inputs1,labels1 = inputs.cuda(), labels.cuda()
+        # inputs1,labels1 = inputs.cuda(), labels.cuda()
         optimizer.zero_grad()
-        outputs = model(inputs1)
-       #print('outputs in tr',shape.outputs)
+        outputs = model(inputs)  #changes
+        
+        print('outputs in tr',outputs.shape)
         
         
-        loss = loss_fn(outputs, labels1)
+        loss = loss_fn(outputs, labels) #changes
         loss.backward()
         optimizer.step()
-            
+        
         running_loss += loss.item()
         
         outputs2 = outputs.cpu().detach()
-        labels2 = labels1.cpu().detach()
+        labels2 = labels.cpu().detach()
+        # neeche wali line bhi thodi change kari hai
         psnr = batch_PSNR(outputs2,labels2)
         psnr_sum += psnr.item()
     
@@ -47,7 +47,8 @@ def training(model, loss_fn, optimizer, tr_dataloader, epoch):
     
     epoch_loss = running_loss / counter
     print(f"Train Loss : {epoch_loss:.8f}")
-    return psnr_sum   
+
+    return psnr_sum 
 
 #use this to calculate psnr(PSNR with data-range) -15/7/'22
 def batch_PSNR(im_true, im_fake, data_range=255):
@@ -86,12 +87,14 @@ def validate(model, loss_fn_mse, val_dataloader):
         for i, data in tqdm(enumerate(val_dataloader), total=int(len(val_dataloader)/val_dataloader.batch_size)):
             counter += 1
             inputs,labels = data
-            inputs, labels = inputs.cuda(), labels.cuda()
+            # inputs, labels = inputs.cuda(), labels.cuda()
             outputs = model(inputs)
 #change loss function in validate, originally loss = loss_fn(outputs, labels) - 11/7/'22
-            #loss = loss_fn(outputs, labels) 
+            # loss = loss_fn(outputs, labels)
+            # print('shape of output',outputs.shape)
+            # print('shape of labels', labels.shape)
             loss_forpsnr = loss_fn_mse(outputs, labels)
-            #print(loss_forpsnr)
+            # print(loss_forpsnr)
             psnr = batch_PSNR(outputs,labels)
     #             if counter % 336 == 0:
     #                 print(psnr)
