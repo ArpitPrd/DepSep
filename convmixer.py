@@ -66,13 +66,13 @@ def AdapConvMixer(dim, depth, kernel_size=9, patch_size=7):
         nn.Conv2d(31, dim, kernel_size=patch_size, stride=patch_size),
         nn.GELU(),
         nn.BatchNorm2d(dim),
-        # *[nn.Sequential(
-        #         Residual(nn.Sequential(
-        #             #add groups=16 or groups=16(meaning dim=BN,(dim/groups),H,W)#dw conv
-        #             nn.Conv2d(dim, dim, kernel_size, groups=16, padding="same"),
-        #             nn.GELU(),
-        #             nn.BatchNorm2d(dim)
-        #         )),
+        *[nn.Sequential(
+                Residual(nn.Sequential(
+                    #add groups=16 or groups=16(meaning dim=BN,(dim/groups),H,W)#dw conv
+                    nn.Conv2d(dim, dim, kernel_size, groups=16, padding="same"),
+                    nn.GELU(),
+                    nn.BatchNorm2d(dim)
+                )))],
         #pointwise conv with groups=2 meaning [BN,dim/groups,h,w]    - 14/7/'22
         nn.Conv2d(dim, dim, kernel_size=1,groups=1),
         nn.GELU(),
@@ -81,6 +81,31 @@ def AdapConvMixer(dim, depth, kernel_size=9, patch_size=7):
         #for change in arch from 32 to 31    - 14/07/'22
         nn.Conv2d(dim,31,kernel_size=3, padding="same")
     )
+
+############## 3d #################
+
+# def AdapConvMixer(dim, depth, kernel_size=9, patch_size=7):#(1*31*64*64)
+#     return nn.Sequential(
+#         nn.Conv3d(1, dim, kernel_size=(1,patch_size,patch_size), stride=(1,patch_size,patch_size)),#(64,31,64,64)
+#         nn.GELU(),#(64,31,64,64)
+#         nn.BatchNorm3d(dim),#(64,31,64,64)
+
+#         *[nn.Sequential(
+#                 Residual(nn.Sequential(#Adding the F(x) with x
+#                     #add groups=16 or groups=16(meaning dim=BN,(dim/groups),H,W)#dw conv
+#                     nn.Conv3d(dim, dim, kernel_size, groups=16, padding="same"),# Padding same ensures the same size # (64,31,64,64)
+#                     nn.GELU(),
+#                     nn.BatchNorm3d(dim)
+#                 )),
+#         # )],
+#         nn.Conv3d(dim, dim, kernel_size=1,groups=1),#(64,31,64,64)
+#         nn.GELU(),
+#         nn.BatchNorm3d(dim),
+#         ) for i in range(depth)],# (64,31,64,64)
+#         nn.Conv3d(dim,1,kernel_size=3, padding="same")#(1,31,64,64)
+#     )
+
+####################################
 
 #AdaptiveMixer with residual removed from dwc 
 # def AdapConvMixer(dim, depth, kernel_size=9, patch_size=7):

@@ -1,3 +1,4 @@
+print('starting import...')
 import os
 import h5py
 import numpy as np
@@ -6,9 +7,11 @@ from scipy.interpolate import interp1d
 from shutil import copyfile
 import matplotlib.pyplot as plt
 import scipy.io
-
+from tqdm import tqdm
+print('import complete...')
 #Im2patch creates patches, use the def of process data below, instead of importing -15/7/'22
 def Im2Patch(img, win, stride=1):
+    print('in Im2Patch...')
     k = 0
     endc = img.shape[0]
     endw = img.shape[1]
@@ -16,7 +19,7 @@ def Im2Patch(img, win, stride=1):
     patch = img[:, 0:endw-win+0+1:stride, 0:endh-win+0+1:stride]
     TotalPatNum = patch.shape[1] * patch.shape[2]
     Y = np.zeros([endc, win*win,TotalPatNum], np.float32)
-    for i in range(win):
+    for i in tqdm(range(win)):
         for j in range(win):
             patch = img[:,i:endw-win+i+1:stride,j:endh-win+j+1:stride]
             Y[:,k,:] = np.array(patch[:]).reshape(endc, TotalPatNum)
@@ -33,12 +36,12 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
     mathy =  h5py.File(hyper_name,'r')
     # mathy = scipy.io.loadmat(hyper_name)
     hyper = np.float32(np.array(mathy['rad']))
-    print('before trans',hyper.shape)
+    # print('before trans',hyper.shape)
     #for bgu,cave
     hyper = np.transpose(hyper, [2,0,1])
-    print('AFTER trans',hyper.shape)
-    hyper = normalize(hyper, max_val=255., min_val=0.)  #normalize rgb in harv
-    print('hypershape',hyper.shape)
+    # print('AFTER trans',hyper.shape)
+    # hyper = normalize(hyper, max_val=255., min_val=0.)  #normalize rgb in harv
+    # print('hypershape',hyper.shape)
     #use normalize here instead of normalizing in matlab(always check in matlab for normalisation(do u even need it)) - 15/7/'22
     #for bgu
     hyper = normalize(hyper, max_val=4095., min_val=0.)
@@ -51,10 +54,10 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
     #rgb without interpolation 
     rgb =  cv2.imread(rgb_name)
     # rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
-    print('before transpose',rgb.shape)    
+    # print('before transpose',rgb.shape)    
     rgb = np.transpose(rgb, [2,0,1])
-    print('trans-rgbshape',rgb.shape)
-    rgb = normalize(np.float32(rgb), max_val=255., min_val=0.)  #normalize rgb in harv
+    # print('trans-rgbshape',rgb.shape)
+    # rgb = normalize(np.float32(rgb), max_val=255., min_val=0.)  #normalize rgb in harv
   
     # rgb插值
     real_rgb = rgb # 3x64x64
@@ -63,7 +66,8 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
     real_rgb = np.append(real_rgb, zeros, axis=0)
     x1 = np.linspace(0, 1, num=3)
     x2 = np.linspace(0, 1, num=31)
-    for m in range(real_rgb.shape[1]):
+    print('interpolating...')
+    for m in tqdm(range(real_rgb.shape[1])):
         for j in range(real_rgb.shape[2]):
             #print('m',m)
             f = interp1d(x1, real_rgb[0:3,m,j])
@@ -71,13 +75,16 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
     print(real_rgb.shape)
     
     # create patches
+    hyper = np.transpose(hyper, [1, 2, 0])
     patches_hyper = Im2Patch(hyper, win=patch_size, stride=stride)
     patches_rgb = Im2Patch(real_rgb, win=patch_size, stride=stride)
-    print('patches rgb',patches_rgb.shape)
-    print('patches hyper',patches_hyper.shape)
+    # print('patches rgb',patches_rgb.shape)
+    # print('patches hyper',patches_hyper.shape)
     # add data
-    for j in range(patches_hyper.shape[3]):
-        print("generate training sample {}".format(index))
+    
+    for j in tqdm(range(patches_hyper.shape[3])):
+        if j % 50 == 0:
+            print("generate training sample {}".format(index))
         sub_hyper = patches_hyper[:,:,:,j]
 #         plt.imshow(sub_hyper[1,:,:])
 #         plt.show()
@@ -145,4 +152,13 @@ def process_data(index, key, patch_size, stride, h5f, hyper_name, rgb_name, mode
 #     index += 1
 #     return index
 
-process_data(index = 1, key = 263, patch_size = 64, stride = 1, h5f = 'train.h5', hyper_name = 'data/BGU/train_spectral/BGU_HS_00263.mat', rgb_name = 'data/BGU/train_clean/BGU_HS_00263_clean.png', mode = 'train')
+mode = 'train'
+_dir = 'data/BGU/' + mode + '_spectral'
+files = os.listdir(_dir)
+h5f_name = 'data/BGU/' + mode + '.h5'
+h5f = h5py.File(h5f_name, 'w')
+index = 1
+for file in tqdm(files):
+    hyper_name = 'data/BGU/' + mode + '_spectral/' + file
+    rgb_name = 'data/BGU/' + mode + '_clean/' + file[:-4] + '_clean.png'
+    index = process_data(index = index, key = 263, patch_size = 64, stride = 64, h5f = h5f, hyper_name = hyper_name, rgb_name = rgb_name, mode = mode)

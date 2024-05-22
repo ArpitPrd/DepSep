@@ -18,7 +18,7 @@ def training(model, loss_fn, optimizer, tr_dataloader, epoch):
     psnr_sum=0.0
     counter = 0
     
-    for i, data in tqdm(enumerate(tr_dataloader), total=int(len(tr_dataloader)/tr_dataloader.batch_size)):
+    for data in tqdm(tr_dataloader):
         counter += 1
         inputs, labels = data
         #interpolate to decide about the size of labels acc. to the patch size - 15/7/'22
@@ -27,7 +27,7 @@ def training(model, loss_fn, optimizer, tr_dataloader, epoch):
         optimizer.zero_grad()
         outputs = model(inputs)  #changes
         
-        print('outputs in tr',outputs.shape)
+        # print('outputs in tr',outputs.shape)
         
         
         loss = loss_fn(outputs, labels) #changes

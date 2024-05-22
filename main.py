@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#% Ask data
-
 import os
 import numpy as np
 import torch
@@ -40,7 +38,7 @@ def main():
 
     #100 epochs-BGU , 300-Harvard, 500-Cave
     # epochs = 100
-    epochs = 1 # changed for testing 
+    epochs = 10 # changed for testing 
     model_name = 'august'
     checkpoint_dir = './data/BGU/checkpoints/'
     model_path = os.path.join(checkpoint_dir, ''.join([model_name, '-{}-{}.pth']))
@@ -97,7 +95,7 @@ def main():
         
 ####################################### Result 2 mat ############################################################
     
-    test_epoch_psnr = Result2Mat(val_dataloader, val_patches, best_model_path)
+    test_epoch_psnr = Result2Mat(model, val_dataloader, val_patches, best_model_path)
     print('test psnr',test_epoch_psnr)
     test_psnr.append(test_epoch_psnr)
     

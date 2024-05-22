@@ -62,11 +62,13 @@ class PreparePatches(Dataset):     #load list of path to __init__
         self.h5f = h5py.File('./data/BGU/train.h5','r')
         self.keys = list(self.h5f.keys())
         random.shuffle(self.keys)
-
+    
     def __len__(self):
         return len(self.keys) 
-            
-           
+        
+    def key(self, index):
+        return str(self.keys[index])
+    
     def __getitem__(self,index):    #load each image/file in __getitem__
         key = str(self.keys[index])
         data = np.array(self.h5f[key])
@@ -83,22 +85,24 @@ class PreparePatches(Dataset):     #load list of path to __init__
 class PreparevalPatches(Dataset):     #load list of absolute path to __init__
     def __init__(self):
         #previous cave file
-        self.h5f = h5py.File('./data/BGU/testwithBRIDGE.h5','r')
+        self.h5f = h5py.File('./data/BGU/val.h5','r')
         self.keys = list(self.h5f.keys())
         random.shuffle(self.keys)
-        self.batch_size = 10 # assumed some batchsize
-
+        self.batch_size = 256 # assumed some batchsize
+    
     def __len__(self):
         return len(self.keys) 
-            
-           
+        
+    def key(self, index):
+        return str(self.keys[index])
+    
     def __getitem__(self,index):    #load each image/file in __getitem__
         key = str(self.keys[index])
         data = np.array(self.h5f[key])
         data = torch.Tensor(data)
         #In Cave, the results were fixed by correctly using the below 'data' range
         return data[0:31,:,:], data[31:62,:,:]
-        
+    
     def get_data_by_key(self, key):
         #assert self.mode == 'test'
         print(self.keys)
