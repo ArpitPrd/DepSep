@@ -10,3 +10,8 @@ This is an initiative funded by the IRD unit IIT Delhi under the Summer Undergra
 - stride = patch_size (assumed) = 64
 - Ar - not included depth in the convmixer. temp training only with depth = 1
 - point wise convolution made naturally
+
+## Progress Week 3
+
+- Ar - patches.py corrected and transpose removed
+- Ar - depsep3d.py created - bandwise conv, pixelwise conv, pointwise conv
