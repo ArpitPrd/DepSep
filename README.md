@@ -17,3 +17,4 @@ This is an initiative funded by the IRD unit IIT Delhi under the Summer Undergra
 - Ar - depsep3d.py created - bandwise conv, pixelwise conv, pointwise conv
 - psnr value = ~48 with just 50 train images! When more images added it will reach 51 according to the paper
 - Trying the novel depsep
+- Dev - Finding errors in the code
