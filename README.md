@@ -26,3 +26,4 @@ We wish to be able to prove that for depth separation in reconstruction of HSI (
   - psnr value = ~48 with just 50 train images! When more images added it will reach 51 according to the paper
   - Trying the novel depsep
   - Dev - Finding errors in the code
+  - Dev - Analyzing the params of the different models
