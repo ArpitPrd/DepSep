@@ -5,6 +5,10 @@ This is an initiative funded by the IRD unit IIT Delhi under the Summer Undergra
 
 We wish to be able to prove that for depth separation in reconstruction of HSI (further in general case as well), is equally or better robust than the standard convolution robust. Also the shift from 2D conv in SOTA to 3D conv with depth separation in another level might reducing model params.
 
+## CodaLab 
+
+https://codalab.lisn.upsaclay.fr/competitions/721#participate
+
 ## Dataset
 
 **Dataset** - https://csciitd-my.sharepoint.com/:f:/g/personal/ee3221883_iitd_ac_in/EsJYLZQrBTdFkqRUcLB-I-UB5CchpiaUJ0j1pPbIA9iMeA?e=XTV7sX
