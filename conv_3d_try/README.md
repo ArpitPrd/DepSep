@@ -1,10 +1,7 @@
 # Reconstruction of Hyperspectral Images from RGB images using depth separable 3D Convolution
 This is an initiative funded by the IRD unit IIT Delhi under the Summer Undergrad Research Award. We intent to produce and efficient and reliable reconstruction technique for HSI (**Hyperspectral Images**).
 
-## Progress Week 1 & 2
+## Reason for small batch size
 
-- Dev - Changed all convolution to 3d adjusted batches and sizes of al inputs
-- Ar - Generated data and ran main.py with conv2d setting
-- stride = patch_size (assumed) = 64
-- Ar - not included depth in the convmixer. temp training only with depth = 1
-- point wise convolution made naturally
+It is SGD - parameter update happens by avg loss. If there is a lot of data in a single batch then the updaation vector may enter a random direction leading to incorrect learning. And since we have lesser data the loss might get into a different trajectory.
+
