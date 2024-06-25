@@ -1,0 +1,76 @@
+!pip install numpy
+!pip install torch
+!pip install torchsummary
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torchsummary import summary
+import numpy as np
+
+class Residual(nn.Module):
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+
+    def forward(self, x):
+        return self.fn(x) + x
+
+def AdapConvMixer(dim, depth, kernel_size=3, patch_size=7):
+    return nn.Sequential(
+        nn.Conv2d(31, dim, kernel_size=patch_size, stride=patch_size),
+        nn.GELU(),
+        nn.BatchNorm2d(dim),
+        *[nn.Sequential(
+                Residual(nn.Sequential(
+                    #add groups=16 or groups=16(meaning dim=BN,(dim/groups),H,W)#dw conv
+                    nn.Conv2d(dim, dim, kernel_size, groups=16, padding="same"),
+                    nn.GELU(),
+                    nn.BatchNorm2d(dim),
+                )),
+                # )))],
+        #pointwise conv with groups=2 meaning [BN,dim/groups,h,w]    - 14/7/'22
+        nn.Conv2d(dim, dim, kernel_size=1,groups=1),
+        nn.GELU(),
+        nn.BatchNorm2d(dim),
+         ) for i in range(depth)],
+        #for change in arch from 32 to 31    - 14/07/'22
+        nn.Conv2d(dim,31,kernel_size=3, padding="same")
+    )
+
+
+
+class doit(nn.Module):
+    def __init__(self,depth):
+        super().__init__()
+        self.conv1=AdapConvMixer(64,depth,5,1)
+    def forward(self,x):
+        ans=torch.zeros_like(x)
+        for i in range (0,x.shape[1]):
+            ans[:,i,:,:]=self.conv1(x[:,i,:,:])
+        return ans
+
+def PointWiseConv(dim):
+    return nn.Sequential(
+        nn.Conv3d(dim,dim,kernel_size=(1,1,1),stride=(1,1,1)),
+        nn.GELU(),
+        nn.BatchNorm3d(dim)
+    )
+
+def mainAdapConvMixer(dim,depth):
+    return Residual(nn.Sequential(
+        nn.Conv3d(1,dim,kernel_size=(1,1,1)),
+        nn.GELU(),
+        nn.BatchNorm3d(dim),
+        doit(depth),
+        PointWiseConv(dim),
+        nn.Conv3d(dim,1,kernel_size=(3,3,3),padding="same"))
+    )
+
+# inputs = np.random.randn(2, 1, 31, 64, 64).astype(np.float32)
+# inputs=torch.from_numpy(inputs)
+# model=mainAdapConvMixer(4,3)
+# outputs=model(inputs)
+# print(outputs.shape)
+
+# print(summary(model,(1,31,64,64)))
+
